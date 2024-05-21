@@ -1,0 +1,33 @@
+{
+	"name": "ArchivoOutputCopy",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ADLS1",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"NombredeArchivo": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().NombredeArchivo",
+					"type": "Expression"
+				},
+				"folderPath": "proyectofinal/capabronce",
+				"fileSystem": "dhernandezcontenedor"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

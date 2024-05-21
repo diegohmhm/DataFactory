@@ -1,0 +1,9 @@
+{
+	"name": "dhernandezfactoriadatos",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "37bbee84-4a0c-4221-a35b-dcf0d35609ae",
+		"tenantId": "068a75f2-04a0-4dd2-9147-1f5588015d0e"
+	}
+}
