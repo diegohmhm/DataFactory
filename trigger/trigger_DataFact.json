@@ -1,0 +1,25 @@
+{
+	"name": "trigger_DataFact",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "pip_exec",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2024-05-23T22:00:00",
+				"endTime": "2024-06-16T22:00:00",
+				"timeZone": "SA Pacific Standard Time"
+			}
+		}
+	}
+}
