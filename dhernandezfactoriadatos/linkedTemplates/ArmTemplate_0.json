@@ -11,6 +11,10 @@
 			"type": "secureString",
 			"metadata": "Cadena protegida para \"accountKey\"de \"ADLS1\""
 		},
+		"AzureDatabricks_DataFactory_accessToken": {
+			"type": "secureString",
+			"metadata": "Cadena protegida para \"accessToken\"de \"AzureDatabricks_DataFactory\""
+		},
 		"LinkContenedor_connectionString": {
 			"type": "secureString",
 			"metadata": "Cadena protegida para \"connectionString\"de \"LinkContenedor\""
@@ -18,6 +22,10 @@
 		"ADLS1_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://dhernandez.dfs.core.windows.net/"
+		},
+		"AzureDatabricks_DataFactory_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0521-011558-vpf2oz3a"
 		}
 	},
 	"variables": {
@@ -42,6 +50,24 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/AzureDatabricks_DataFactory')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-807464499844537.17.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDatabricks_DataFactory_accessToken')]"
+					},
+					"existingClusterId": "[parameters('AzureDatabricks_DataFactory_properties_typeProperties_existingClusterId')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LinkContenedor')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -53,6 +79,80 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pip_capaoro')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Transferir datos de Capa Plata a Capa Oro",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Users/diego10_214@hotmail.com/Transferir datos de Capa Plata a Capa Oro"
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricks_DataFactory",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-05-21T23:05:15Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDatabricks_DataFactory')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pip_capaplata')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Transferir datos de Capa Bronce a Capa Plata",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Users/diego10_214@hotmail.com/Transferir datos de Capa Bronce a Capa Plata"
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricks_DataFactory",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-05-21T23:05:15Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDatabricks_DataFactory')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/ArchivoOutputCopy')]",
@@ -313,6 +413,129 @@
 				"[concat(variables('factoryId'), '/datasets/ArchivosInputADLS1')]",
 				"[concat(variables('factoryId'), '/datasets/ArchivosInputCopy')]",
 				"[concat(variables('factoryId'), '/datasets/ArchivoOutputCopy')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pip_exec')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Pip_capabronce",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pip_capabronce",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute Pip_capaplata",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Pip_capabronce",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pip_capaplata",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute Pip_capaoro",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Pip_capaplata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pip_capaoro",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-05-21T23:17:04Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/pip_capabronce')]",
+				"[concat(variables('factoryId'), '/pipelines/pip_capaplata')]",
+				"[concat(variables('factoryId'), '/pipelines/pip_capaoro')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/trigger_DataFact')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "pip_exec",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2024-05-23T22:00:00",
+						"endTime": "2024-06-16T22:00:00",
+						"timeZone": "SA Pacific Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								22
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/pip_exec')]"
 			]
 		}
 	]
