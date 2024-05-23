@@ -3,7 +3,14 @@
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Started",
-		"pipelines": [],
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "pip_exec",
+					"type": "PipelineReference"
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
@@ -11,7 +18,15 @@
 				"interval": 1,
 				"startTime": "2024-05-23T22:00:00",
 				"endTime": "2024-06-16T22:00:00",
-				"timeZone": "SA Pacific Standard Time"
+				"timeZone": "SA Pacific Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						22
+					]
+				}
 			}
 		}
 	}
